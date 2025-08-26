@@ -1,104 +1,197 @@
- // Store the current balance
-  let currentBalance = 45000;
-  const correctPin = "1234"; // Default PIN for demo purposes
-  
-  // Get all section elements
-  const sections = {
-    addMoney: document.getElementById('add-money-parent'),
-    cashOut: document.getElementById('Cashout-parent'),
-    transferMoney: document.getElementById('Transfer-money'),
-    bonus: document.getElementById('bonus-money'),
-    billPay: document.getElementById('bill-pay'),
-    history: document.getElementById('history-bill')
-  };
-  
-  // Get all button elements
-  const buttons = {
-    addMoney: document.getElementById('add-button'),
-    cashOut: document.getElementById('cash-out-button'),
-    transferMoney: document.getElementById('money-transfer-btn'),
-    bonus: document.getElementById('bonus-btn'),
-    billPay: document.getElementById('bill-pay-btn'),
-    history: document.getElementById('history-btn')
-  };
-  
-  // Function to hide all sections
-  function hideAllSections() {
-    for (const key in sections) {
-      sections[key].classList.remove('active-section');
+const validPin = 1234
+const transactionData = []
+
+// functions to get input values
+function getInputValueNumber (id){
+    const inputField = document.getElementById(id)
+    const inputFieldValue = inputField.value
+    const inputFieldValueNumber = parseInt(inputFieldValue)
+    return inputFieldValueNumber
+}
+
+function getInputValue (id){
+    const inputField = document.getElementById(id)
+    const inputFieldValue = inputField.value
+    return inputFieldValue
+}
+
+// function to get innertext
+function getInnerText(id){
+    const element = document.getElementById(id)
+    const elementValue = element.innerText
+    const elementValueNumber = parseInt(elementValue)
+
+    return elementValueNumber
+}
+
+// function to set innerText
+function setInnerText(value){
+    console.log(value)
+    const availableBalanceElement = document.getElementById("available-balance")
+    availableBalanceElement.innerText = value
+}
+
+//function to toggle
+function handleToggle(id) {
+    const forms = document.getElementsByClassName("form")
+    for(const form of forms){
+        form.style.display = "none"
     }
-  }
-  
-  // Function to show a specific section
-  function showSection(section) {
-    hideAllSections();
-    sections[section].classList.add('active-section');
-  }
-  
-  // Add event listeners to all buttons
-  buttons.addMoney.addEventListener('click', () => showSection('addMoney'));
-  buttons.cashOut.addEventListener('click', () => showSection('cashOut'));
-  buttons.transferMoney.addEventListener('click', () => showSection('transferMoney'));
-  buttons.bonus.addEventListener('click', () => showSection('bonus'));
-  buttons.billPay.addEventListener('click', () => showSection('billPay'));
-  buttons.history.addEventListener('click', () => showSection('history'));
-  
-  // Add Money functionality
-  document.getElementById('add-money-btn').addEventListener('click', function() {
-    const amountInput = document.getElementById('add-amount-input');
-    const pinInput = document.getElementById('add-pin');
-    const amount = parseFloat(amountInput.value);
+    document.getElementById(id).style.display = "block"
+}
+
+//function to toggle buttons
+function handleButtonToggle(id){
+    const formBtns = document.getElementsByClassName("form-btn")
+
     
-    // Validate inputs
-    if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid amount');
-      return;
+    for(const btn of formBtns){
+        btn.classList.remove("border-[#0874f2]","bg-[#0874f20d]")
+        btn.classList.add("border-gray-300")
+
+
     }
+
+document.getElementById(id).classList.remove("border-gray-300")
+    document.getElementById(id).classList.add("border-[#0874f2]","bg-[#0874f20d]")
+}
+
+
+
+// add money feature
+
+document.getElementById("add-money-btn").addEventListener("click",function(e){
+    e.preventDefault()
+    const bank = getInputValue("bank");
+    const accountNumber = document.getElementById("account-number").value
+
+    const amount = getInputValueNumber("add-amount")
     
-    if (pinInput.value !== correctPin) {
-      alert('Incorrect PIN. Please try again.');
-      return;
+    if(amount<=0){
+        alert("invalid amount")
+        return;
     }
-    
-    // Update balance
-    currentBalance += amount;
-    document.getElementById('available-balance').textContent = currentBalance;
-    
-    // Add to transaction history
-    addTransaction('Money Added', amount);
-    
-    // Reset form
-    amountInput.value = '';
-    pinInput.value = '';
-    
-    alert(`Successfully added $${amount} to your account!`);
-  });
-  
-  // Function to add transaction to history
-  function addTransaction(type, amount) {
-    const noTransactions = document.getElementById('no-transactions');
-    const transactionList = document.getElementById('transaction-list');
-    
-    // Hide "no transactions" message if it's the first transaction
-    if (noTransactions.style.display !== 'none') {
-      noTransactions.style.display = 'none';
-      transactionList.classList.remove('hidden');
+
+    const pinNumber = getInputValueNumber("add-pin")
+
+
+    const availableBalance = getInnerText("available-balance")
+
+
+    if(accountNumber.length<11){
+        alert("Invalid account Number");
+        return;
     }
+
+    if(pinNumber !== validPin){
+        alert("Invalid pin Number")
+        return;
+    }
+
+    const totalNewAvailableBalance = amount+availableBalance
+
+ 
+    setInnerText(totalNewAvailableBalance)
+
+    const data = {
+        name:"Add Money",
+        date:new Date().toLocaleTimeString()
+    }
+
+    transactionData.push(data)
+    console.log(transactionData)
+
+
+})
+
+
+//cashout money feature
+
+document.getElementById("withdraw-btn").addEventListener("click",function(e){
+    e.preventDefault()
     
-    // Create transaction element
-    const transaction = document.createElement('div');
-    transaction.className = 'transaction-item border-b py-2';
-    transaction.innerHTML = `
-      <div class="flex justify-between">
-        <span class="font-semibold">${type}</span>
-        <span class="${type === 'Money Added' ? 'text-green-600' : 'text-red-600'}">${type === 'Money Added' ? '+' : '-'}$${amount}</span>
-      </div>
-      <div class="text-sm text-gray-500">${new Date().toLocaleString()}</div>
-    `;
+    const amount = getInputValueNumber("withdraw-amount")
+
+    const availableBalance =getInnerText("available-balance")
+
+    if(amount<=0 || amount>availableBalance){
+        alert("invalid amount")
+        return
+    }
+
+    const totalNewAvailableBalance = availableBalance - amount
+
+    console.log(totalNewAvailableBalance)
+
+    setInnerText(totalNewAvailableBalance)
     
-    // Add to the top of the list
-    transactionList.insertBefore(transaction, transactionList.firstChild);
-  }
-  
-  // Initially hide all sections
-  hideAllSections();
+    const data = {
+        name:"Cash Out",
+        date:new Date().toLocaleTimeString()
+    }
+
+    transactionData.push(data)
+    console.log(transactionData)
+})
+
+
+document.getElementById("transactions-button").addEventListener("click",function(){
+    const transactionContainer = document.getElementById("transaction-container")
+    transactionContainer.innerText = ""
+
+    for(const data of transactionData){
+        const div = document.createElement("div")
+        div.innerHTML=`
+        <div class=" bg-white rounded-xl p-3 flex justify-between items-center mt-3">
+              <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-[#f4f5f7]">
+                    <img src="./assets/wallet1.png" class="mx-auto" alt="" />
+                  </div>
+                  <div class="ml-3">
+                    <h1>${data.name}</h1>
+                    <p>${data.date}</p>
+                  </div>
+              </div>
+      
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </div>
+        `
+
+        transactionContainer.appendChild(div)
+
+
+    }
+})
+
+
+// toggling feature
+
+document.getElementById("add-button").addEventListener("click",function(e){
+    handleToggle("add-money-parent")
+
+    handleButtonToggle("add-button")
+
+})
+document.getElementById("cash-out-button").addEventListener("click",function(){
+    handleToggle("cash-out-parent")
+    handleButtonToggle("cash-out-button")
+ 
+})
+
+document.getElementById("transfer-button").addEventListener("click",function(){
+
+    handleToggle("transfer-money-parent")
+    handleButtonToggle("transfer-button")
+})
+document.getElementById("bonus-button").addEventListener("click",function(){
+    handleToggle("get-bonus-parent")
+    handleButtonToggle("bonus-button")
+})
+document.getElementById("bill-button").addEventListener("click",function(){
+    handleToggle("pay-bill-parent")
+    handleButtonToggle("bill-button")
+})
+document.getElementById("transactions-button").addEventListener("click",function(){
+    handleToggle("transactions-parent")
+    handleButtonToggle("transactions-button")
+})
